@@ -1,49 +1,31 @@
-use AdventureWorks
-Go
 create schema Resources
 
-firstTable-
-create table resources.Employee(EmployeeId int,Name varchar(50),Address varchar(50));
+create table resources.Employee(EmployeeId int Primary Key,Name varchar(50),Address varchar(50));
 
-secondTable-
-create table resources.TeamMembers(MeambersId int,EmployeeId int,TeamName varchar(50));
+create table resources.TeamMembers(MembersId int Primary Key,EmployeeId int,TeamName varchar(50));
 
-creatview-
+Create view ViewEmployeeDetails 
+as 
 SELECT emp.EmployeeId, emp.Name, tm.TeamName
 FROM   resources.Employee AS emp INNER JOIN
              Resources.TeamMembers AS tm ON emp.EmployeeId = tm.EmployeeId
 
-
-insertdata-
 insert into resources.Employee(Name) values ('krati');
-insert into resources.TeamMembers(EmployeeId,TeamName) values (2,'war-2');
-select * from dbo.vEmp
+insert into resources.TeamMembers(EmployeeId,TeamName) values (1,'radixian');
+select * from dbo.ViewEmployeeDetails 
 select * from resources.Employee
 select * from resources.TeamMembers
 
-createTrigger-
-alter trigger trigger_update_view
-on dbo.vEmp
-Instead of update as
-begin
-    set nocount on;
-	if(update(Name))
-	begin 
-	declare @EmployeeId int,@Name varchar(50)
-	select @EmployeeId=ins.EmployeeId,@Name=ins.Name from inserted as ins
-	update resources.Employee set Name=@Name where EmployeeId=@EmployeeId;
-	end
-	
-  
-  if(UPDATE(TeamName))
-  begin
-  declare @TeamName varchar(50)
-  select @EmployeeId=ins.EmployeeId,@TeamName=ins.TeamName from inserted as ins
-  Update resources.TeamMembers set TeamName  = @TeamName where EmployeeId=@EmployeeId;
- End  
- End
-  
+Create Trigger tr_InsteadOfUpdate  
+on ViewEmployeeDetails  
+instead of update  
+as  
+Begin   
+declare @EmployeeId int=(select EmployeeId from inserted)
+Update ViewEmployeeDetails  set Name=(select Name from inserted) where EmployeeId=@EmployeeId
+Update ViewEmployeeDetails set TeamName=(select TeamName from inserted) where EmployeeId=@EmployeeId
+ End 
 
-  update dbo.vEmp set TeamName='kratis' where EmployeeId=2
-
-  select * from dbo.vEmp;
+ 
+ Update ViewEmployeeDetails  set 
+ Name='sakshi',TeamName='Radix' where EmployeeId=1
